@@ -1,21 +1,70 @@
 import logging
-
 from string import ascii_lowercase
+
+from sqlalchemy import create_engine
+from sqlalchemy import Column, Integer, String, Boolean, PickleType
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 
 from map.map import GoBoard
 from map.tile import Position
 
 logger = logging.getLogger(__name__)
 
+Base = declarative_base()
+
+
+class Move(Base):
+    __tablename__ = 'move'
+    id_ = Column(Integer, primary_key=True, autoincrement=True)
+    pos_x = Column(Integer())
+    pos_y = Column(Integer())
+    color = Column(String(10))
+    board_id = Column(Integer())
+
+    def __repr__(self):
+        return "<Move(id_='{}', pos_x='{}', pos_y='{}', color='{}',board_id='{}')>".format(
+                                self.id_, self.pos_x, self.pos_y, self.color, self.board_id)
+
+
+class Game(Base):
+    __tablename__ = 'game'
+    id_ = Column(Integer, primary_key=True, autoincrement=True)
+    black_turn = Column(Boolean(), default=True)
+    board_id = Column(Integer())
+
+    def __repr__(self):
+        return "<Game(id_='{}', black_turn='{}', ,board_id='{}')>".format(
+                                self.id_, self.black_turn, self.board_id)
+
+
+class Board(Base):
+    __tablename__ = 'board'
+    id_ = Column(Integer, primary_key=True, autoincrement=True)
+    board_object = Column(PickleType())
+
+    def __repr__(self):
+        return "<Board(id_='{}')>".format(
+                                self.id_)
+
 
 class GoGame:
-    def __init__(self, size):
+    def __init__(self, size, db_uri):
         if size not in [9, 13, 19]:
             raise ValueError
         self.size = size
         self.board = GoBoard(size)
         self._win = False
         self.blacks_turn = True
+        self.db_uri = db_uri
+        self._init_db()
+
+    def _init_db(self):
+        engine = create_engine(self.db_uri)
+        Base.metadata.create_all(engine)
+        Session = sessionmaker()
+        Session.configure(bind=engine)
+        self.session = Session()
 
     def _validate_input(self, input_pos):
         try:
