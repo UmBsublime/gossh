@@ -8,8 +8,8 @@ import asyncio, asyncssh, subprocess, sys
 async def handle_client(process):
     print("A player has joined")
 
-    bc_proc = subprocess.Popen('/mnt/c/Users/Sublime/PycharmProjects/yaga/venv/bin/python3' 
-                               ' /mnt/c/Users/Sublime/PycharmProjects/yaga/t.py', shell=True, stdin=subprocess.PIPE,
+    bc_proc = subprocess.Popen('/mnt/c/Users/Sublime/PycharmProjects/gossh/venv/bin/python3' 
+                               ' /mnt/c/Users/Sublime/PycharmProjects/gossh/go.py', shell=True, stdin=subprocess.PIPE,
                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     await process.redirect(stdin=bc_proc.stdin, stdout=bc_proc.stdout,
